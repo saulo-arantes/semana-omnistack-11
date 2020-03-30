@@ -12,15 +12,23 @@ module.exports = {
     const { name, email, whatsapp, city, state } = request.body;
     const id = crypto.randomBytes(4).toString('HEX');
   
-    await connection('ngos').insert({
-      id,
-      name,
-      email,
-      whatsapp,
-      city,
-      state
-    });
-  
-    return response.json({ id });
+    try {
+      await connection('ngos').insert({
+        id,
+        name,
+        email,
+        whatsapp,
+        city,
+        state
+      });
+
+      return response.json({ id });
+    } catch (error) {
+      if (error.code == 'SQLITE_CONSTRAINT') {
+        return response.status(400).json({
+          error: 'Houve um erro ao processar os dados em nosso servidor.'
+        });
+      }
+    }
   }
 };
